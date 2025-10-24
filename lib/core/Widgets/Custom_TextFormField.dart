@@ -34,10 +34,11 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      textDirection: TextDirection.rtl,
       cursorColor: primaryColor,
       validator: (v) {
         if (v == null || v.isEmpty) {
-          return 'please fill ${widget.hint}';
+          return 'please fill the field';
         }
         null;
       },

@@ -1,32 +1,28 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:tharad/Features/Auth/presentation/Widgets/Picked_image_widget.dart';
 import 'package:tharad/constants.dart';
 import 'package:tharad/core/Widgets/Custom_Buttom.dart';
 import 'package:tharad/core/Widgets/Custom_TextFormField.dart';
-import 'package:tharad/core/utils/routing/App_routing.dart';
 import 'package:tharad/core/utils/styles/app_styles.dart';
 
-class SignupView extends StatefulWidget {
-  const SignupView({super.key});
+class LoginView extends StatefulWidget {
+  const LoginView({super.key});
 
   @override
-  State<SignupView> createState() => _SignupViewState();
+  State<LoginView> createState() => _LoginViewState();
 }
 
-class _SignupViewState extends State<SignupView> {
-  TextEditingController usernameController = TextEditingController();
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passController = TextEditingController();
-  TextEditingController confirmpassController = TextEditingController();
+class _LoginViewState extends State<LoginView> {
+  bool isChecked = false;
   final GlobalKey<FormState> _Formkey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: FocusScope.of(context).unfocus,
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
       child: Scaffold(
         body: SingleChildScrollView(
           child: Center(
@@ -36,32 +32,11 @@ class _SignupViewState extends State<SignupView> {
                 key: _Formkey,
                 child: Column(
                   children: [
-                    Gap(80.h),
+                    Gap(120.h),
                     Image.asset('assets/images/tharadlogo.png'),
-                    Gap(40.h),
-                    Text('إنشاء حساب جديد', style: AppStyles.textstyle20),
+                    Gap(80.h),
+                    Text('تسجيل الدخول', style: AppStyles.textstyle20),
                     Gap(24.h),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        'الصوره الشخصية',
-                        style: AppStyles.textstyle12,
-                      ),
-                    ),
-                    Gap(6.h),
-                    Picked_image_widget(),
-                    Gap(12.h),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Text('إسم المستخدم', style: AppStyles.textstyle12),
-                    ),
-                    Gap(6.h),
-                    CustomTextFormField(
-                      hint: 'thar22',
-                      ispassword: false,
-                      controller: usernameController,
-                    ),
-                    Gap(12.h),
                     Align(
                       alignment: Alignment.centerRight,
                       child: Text(
@@ -73,7 +48,6 @@ class _SignupViewState extends State<SignupView> {
                     CustomTextFormField(
                       hint: 'Tharad@gmail.com',
                       ispassword: false,
-                      controller: emailController,
                     ),
                     Gap(12.h),
                     Align(
@@ -81,32 +55,44 @@ class _SignupViewState extends State<SignupView> {
                       child: Text('كلمة المرور ', style: AppStyles.textstyle12),
                     ),
                     Gap(6.h),
-                    CustomTextFormField(
-                      hint: '**********',
-                      ispassword: true,
-                      controller: passController,
-                    ),
-                    Gap(12.h),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        'تأكيد كلمة المرور',
-                        style: AppStyles.textstyle12,
-                      ),
-                    ),
-                    Gap(6.h),
-                    CustomTextFormField(
-                      hint: '**********',
-                      ispassword: true,
-                      controller: confirmpassController,
+                    CustomTextFormField(hint: '**********', ispassword: true),
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: isChecked,
+                          activeColor: primaryColor,
+                          onChanged: (val) {
+                            setState(() {
+                              isChecked = val!;
+                            });
+                          },
+                        ),
+                        Text(
+                          'تذكرني',
+                          style: AppStyles.textstyle12.copyWith(
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        Spacer(),
+                        TextButton(
+                          onPressed: () {},
+                          child: Text(
+                            'هل نسيت كلمه المرور؟',
+                            style: AppStyles.textstyle12.copyWith(
+                              color: primaryColor,
+                              decoration: TextDecoration.underline,
+                              decorationColor: primaryColor,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     Gap(40.h),
                     CustomButtom(
-                      text: 'إنشاء حساب جديد',
+                      text: 'تسجيل الدخول',
                       onTap: () {
-                        GoRouter.of(context).push('/otp');
                         if (_Formkey.currentState!.validate()) {
-                          print('sucsess SignUp');
+                          print('sucsess login');
                         }
                       },
                     ),
@@ -114,16 +100,16 @@ class _SignupViewState extends State<SignupView> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(' لديك حساب؟'),
+                        Text(' ليس لديك حساب؟'),
                         TextButton(
                           style: TextButton.styleFrom(
                             padding: EdgeInsets.symmetric(horizontal: 3.w),
                           ),
                           onPressed: () {
-                            GoRouter.of(context).push('/login');
+                            GoRouter.of(context).push('/');
                           },
                           child: Text(
-                            'تسجيل الدخول',
+                            'إنشاء حساب جديد',
                             style: AppStyles.textstyle14.copyWith(
                               color: primaryColor,
                               decoration: TextDecoration.underline,
