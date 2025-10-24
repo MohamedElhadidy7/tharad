@@ -12,14 +12,14 @@ class ResendWidget extends StatefulWidget {
 }
 
 class _ResendWidgetState extends State<ResendWidget> {
-  int remainingSeconds = 0;
+  int remainingSeconds = 59;
   Timer? timer;
-  bool canResend = true; // في الأول الزر مفعل والعداد مش ظاهر
+  bool isCounting = false;
 
   void startTimer() {
     setState(() {
-      remainingSeconds = 60;
-      canResend = false;
+      isCounting = true;
+      remainingSeconds = 59;
     });
 
     timer?.cancel();
@@ -27,7 +27,7 @@ class _ResendWidgetState extends State<ResendWidget> {
       if (remainingSeconds == 0) {
         t.cancel();
         setState(() {
-          canResend = true;
+          isCounting = false;
         });
       } else {
         setState(() {
@@ -35,6 +35,12 @@ class _ResendWidgetState extends State<ResendWidget> {
         });
       }
     });
+  }
+
+  String formatTime(int seconds) {
+    final minutes = (seconds ~/ 60).toString().padLeft(2, '0');
+    final secs = (seconds % 60).toString().padLeft(2, '0');
+    return "$minutes:$secs";
   }
 
   @override
@@ -49,15 +55,13 @@ class _ResendWidgetState extends State<ResendWidget> {
       padding: EdgeInsets.symmetric(horizontal: 24.w),
       child: Row(
         children: [
-          // 👇 العداد يظهر فقط لما يكون شغال
-          if (!canResend)
-            Text(
-              ' 00:${remainingSeconds.toString().padLeft(2, '0')} Sec',
-              style: AppStyles.textstyle12.copyWith(
-                color: primaryColor,
-                fontWeight: FontWeight.bold,
-              ),
+          Text(
+            ' ${formatTime(remainingSeconds)} Sec',
+            style: AppStyles.textstyle12.copyWith(
+              color: isCounting ? primaryColor : Colors.grey,
+              fontWeight: FontWeight.bold,
             ),
+          ),
           const Spacer(),
           Row(
             children: [
@@ -66,19 +70,17 @@ class _ResendWidgetState extends State<ResendWidget> {
                 style: TextButton.styleFrom(
                   padding: EdgeInsets.symmetric(horizontal: 3.w),
                 ),
-                onPressed: canResend
-                    ? () {
+                onPressed: isCounting
+                    ? null
+                    : () {
                         startTimer();
-                      }
-                    : null,
+                      },
                 child: Text(
                   'إعادة إرسال',
                   style: AppStyles.textstyle12.copyWith(
-                    color: canResend
-                        ? primaryColor // لما الزر مفعل → لونه الأساسي
-                        : Colors.grey, // لما العدّاد شغال → رمادي
+                    color: isCounting ? Colors.grey : primaryColor,
                     decoration: TextDecoration.underline,
-                    decorationColor: canResend ? primaryColor : Colors.grey,
+                    decorationColor: isCounting ? Colors.grey : primaryColor,
                   ),
                 ),
               ),

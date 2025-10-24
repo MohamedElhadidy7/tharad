@@ -1,10 +1,9 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:tharad/Features/Auth/presentation/Widgets/pin_textfield_widget.dart';
 import 'package:tharad/Features/Auth/presentation/Widgets/resend_widget.dart';
-import 'package:tharad/constants.dart';
+
 import 'package:tharad/core/Widgets/Custom_Buttom.dart';
 import 'package:tharad/core/utils/styles/app_styles.dart';
 
