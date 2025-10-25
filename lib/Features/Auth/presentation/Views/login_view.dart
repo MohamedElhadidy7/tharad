@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:tharad/constants.dart';
 import 'package:tharad/core/Widgets/Custom_Buttom.dart';
 import 'package:tharad/core/Widgets/Custom_TextFormField.dart';
+import 'package:tharad/core/utils/helpers/validation.dart';
 import 'package:tharad/core/utils/styles/app_styles.dart';
 
 class LoginView extends StatefulWidget {
@@ -17,6 +18,8 @@ class LoginView extends StatefulWidget {
 class _LoginViewState extends State<LoginView> {
   bool isChecked = false;
   final GlobalKey<FormState> _Formkey = GlobalKey<FormState>();
+  TextEditingController emailcontroller = TextEditingController();
+  TextEditingController passcontroller = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -48,6 +51,7 @@ class _LoginViewState extends State<LoginView> {
                     CustomTextFormField(
                       hint: 'Tharad@gmail.com',
                       ispassword: false,
+                      validator: AppValidators.validateEmail,
                     ),
                     Gap(12.h),
                     Align(
@@ -55,7 +59,15 @@ class _LoginViewState extends State<LoginView> {
                       child: Text('كلمة المرور ', style: AppStyles.textstyle12),
                     ),
                     Gap(6.h),
-                    CustomTextFormField(hint: '**********', ispassword: true),
+                    CustomTextFormField(
+                      hint: '**********',
+                      ispassword: true,
+                      validator: (value) =>
+                          AppValidators.validateConfirmPassword(
+                            value,
+                            passcontroller.text,
+                          ),
+                    ),
                     Row(
                       children: [
                         Checkbox(

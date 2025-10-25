@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:tharad/Features/Auth/presentation/Widgets/pin_textfield_widget.dart';
 import 'package:tharad/Features/Auth/presentation/Widgets/resend_widget.dart';
 
@@ -45,7 +46,12 @@ class _OtpVerifivationViewState extends State<OtpVerifivationView> {
               ),
               ResendWidget(),
               Gap(40.h),
-              CustomButtom(text: 'المتابعه'),
+              CustomButtom(
+                text: 'المتابعه',
+                onTap: () {
+                  GoRouter.of(context).go('/login');
+                },
+              ),
             ],
           ),
         ),

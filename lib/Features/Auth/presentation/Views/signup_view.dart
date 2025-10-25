@@ -1,146 +1,20 @@
-import 'package:flutter/cupertino.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
-import 'package:tharad/Features/Auth/presentation/Widgets/Picked_image_widget.dart';
-import 'package:tharad/constants.dart';
-import 'package:tharad/core/Widgets/Custom_Buttom.dart';
-import 'package:tharad/core/Widgets/Custom_TextFormField.dart';
-import 'package:tharad/core/utils/routing/App_routing.dart';
-import 'package:tharad/core/utils/styles/app_styles.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tharad/Features/Auth/data/repos/AuthRepos_Implemntation.dart';
+import 'package:tharad/Features/Auth/presentation/Widgets/SignUpViewBody.dart';
+import 'package:tharad/Features/Auth/presentation/manger/SignUp_Cubit/sign_up_cubit.dart';
+import 'package:tharad/core/utils/network/api_services.dart';
 
-class SignupView extends StatefulWidget {
+class SignupView extends StatelessWidget {
   const SignupView({super.key});
 
   @override
-  State<SignupView> createState() => _SignupViewState();
-}
-
-class _SignupViewState extends State<SignupView> {
-  TextEditingController usernameController = TextEditingController();
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passController = TextEditingController();
-  TextEditingController confirmpassController = TextEditingController();
-  final GlobalKey<FormState> _Formkey = GlobalKey<FormState>();
-  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: FocusScope.of(context).unfocus,
-      child: Scaffold(
-        body: SingleChildScrollView(
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Form(
-                key: _Formkey,
-                child: Column(
-                  children: [
-                    Gap(80.h),
-                    Image.asset('assets/images/tharadlogo.png'),
-                    Gap(40.h),
-                    Text('إنشاء حساب جديد', style: AppStyles.textstyle20),
-                    Gap(24.h),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        'الصوره الشخصية',
-                        style: AppStyles.textstyle12,
-                      ),
-                    ),
-                    Gap(6.h),
-                    Picked_image_widget(),
-                    Gap(12.h),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Text('إسم المستخدم', style: AppStyles.textstyle12),
-                    ),
-                    Gap(6.h),
-                    CustomTextFormField(
-                      hint: 'thar22',
-                      ispassword: false,
-                      controller: usernameController,
-                    ),
-                    Gap(12.h),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        'البريد الإلكتروني',
-                        style: AppStyles.textstyle12,
-                      ),
-                    ),
-                    Gap(6.h),
-                    CustomTextFormField(
-                      hint: 'Tharad@gmail.com',
-                      ispassword: false,
-                      controller: emailController,
-                    ),
-                    Gap(12.h),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Text('كلمة المرور ', style: AppStyles.textstyle12),
-                    ),
-                    Gap(6.h),
-                    CustomTextFormField(
-                      hint: '**********',
-                      ispassword: true,
-                      controller: passController,
-                    ),
-                    Gap(12.h),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        'تأكيد كلمة المرور',
-                        style: AppStyles.textstyle12,
-                      ),
-                    ),
-                    Gap(6.h),
-                    CustomTextFormField(
-                      hint: '**********',
-                      ispassword: true,
-                      controller: confirmpassController,
-                    ),
-                    Gap(40.h),
-                    CustomButtom(
-                      text: 'إنشاء حساب جديد',
-                      onTap: () {
-                        GoRouter.of(context).push('/otp');
-                        if (_Formkey.currentState!.validate()) {
-                          print('sucsess SignUp');
-                        }
-                      },
-                    ),
-                    Gap(8.h),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(' لديك حساب؟'),
-                        TextButton(
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.symmetric(horizontal: 3.w),
-                          ),
-                          onPressed: () {
-                            GoRouter.of(context).push('/login');
-                          },
-                          child: Text(
-                            'تسجيل الدخول',
-                            style: AppStyles.textstyle14.copyWith(
-                              color: primaryColor,
-                              decoration: TextDecoration.underline,
-                              decorationColor: primaryColor,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Gap(80.h),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
+    return BlocProvider(
+      create: (context) =>
+          SignUpCubit(AuthReposImplementation(apiService: ApiService(Dio()))),
+      child: const SignupViewBody(),
     );
   }
 }

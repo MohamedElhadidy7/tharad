@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 import 'package:tharad/constants.dart';
 
 class CustomTextFormField extends StatefulWidget {
   const CustomTextFormField({
-    super.key,
+    Key? key,
     required this.hint,
     required this.ispassword,
     this.controller,
-  });
+    required this.validator,
+  }) : super(key: key);
   final String hint;
   final bool ispassword;
   final TextEditingController? controller;
+  final String? Function(String?)? validator;
 
   @override
   State<CustomTextFormField> createState() => _CustomTextFormFieldState();
@@ -19,6 +22,7 @@ class CustomTextFormField extends StatefulWidget {
 
 class _CustomTextFormFieldState extends State<CustomTextFormField> {
   late bool _obscureText;
+
   @override
   void initState() {
     _obscureText = widget.ispassword;
@@ -36,12 +40,8 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
     return TextFormField(
       textDirection: TextDirection.rtl,
       cursorColor: primaryColor,
-      validator: (v) {
-        if (v == null || v.isEmpty) {
-          return 'please fill the field';
-        }
-        null;
-      },
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      validator: widget.validator,
       controller: widget.controller,
       obscureText: _obscureText,
       decoration: InputDecoration(
