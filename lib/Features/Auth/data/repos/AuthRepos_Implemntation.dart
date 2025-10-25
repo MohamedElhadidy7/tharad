@@ -3,6 +3,7 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:tharad/Features/Auth/data/models/login_model.dart';
+import 'package:tharad/Features/Auth/data/models/otp_model.dart';
 import 'package:tharad/Features/Auth/data/models/sign_up_model.dart';
 import 'package:tharad/Features/Auth/data/repos/Authrepos.dart';
 import 'package:tharad/core/utils/network/api_services.dart';
@@ -13,7 +14,6 @@ class AuthReposImplementation implements AuthRepos {
 
   AuthReposImplementation({required this.apiService});
 
-  // ============== Sign Up ==============
   @override
   Future<RegistrationResponseModel> signUpService({
     required String username,
@@ -23,8 +23,6 @@ class AuthReposImplementation implements AuthRepos {
     required String? imagePath,
   }) async {
     try {
-      print('=== Repository: Starting Sign Up ===');
-
       FormData formData = FormData.fromMap({
         'username': username,
         'email': email,
@@ -48,28 +46,19 @@ class AuthReposImplementation implements AuthRepos {
             ),
           ),
         );
-        print('Image added successfully!');
-      } else {
-        print('No image provided');
-      }
+      } else {}
 
       final response = await apiService.post(
         endpoint: 'auth/register',
         data: formData,
       );
 
-      print('=== Repository: Sign Up Success ===');
       return RegistrationResponseModel.fromJson(response);
     } on DioException catch (e) {
-      print('=== Repository: DioException ===');
       throw ErrorHandler.handleDioError(e);
     } on SocketException catch (e) {
-      print('=== Repository: SocketException ===');
       throw ErrorHandler.handleSocketError(e);
     } catch (e, stackTrace) {
-      print('=== Repository: Unknown Error ===');
-      print('Error: $e');
-      print('StackTrace: $stackTrace');
       throw ErrorHandler.handleGeneralError(e);
     }
   }
@@ -85,6 +74,27 @@ class AuthReposImplementation implements AuthRepos {
         data: {'email': email, 'password': password},
       );
       return LoginResponseModel.fromJson(response);
+    } on DioException catch (e) {
+      throw ErrorHandler.handleDioError(e);
+    } on SocketException catch (e) {
+      throw ErrorHandler.handleSocketError(e);
+    } catch (e, stackTrace) {
+      throw ErrorHandler.handleGeneralError(e);
+    }
+  }
+
+  @override
+  Future<VerifyOtpModel> verifyOtpService({
+    required String email,
+    required String otp,
+  }) async {
+    try {
+      final response = await apiService.get(
+        endpoint: 'otp',
+        queryParameters: {'email': email, 'otp': otp},
+      );
+
+      return VerifyOtpModel.fromJson(response);
     } on DioException catch (e) {
       throw ErrorHandler.handleDioError(e);
     } on SocketException catch (e) {

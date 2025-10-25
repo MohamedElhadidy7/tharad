@@ -34,9 +34,6 @@ class _LoginViewBodyState extends State<LoginViewBody> {
 
   void _handleLogin() {
     if (_formKey.currentState!.validate()) {
-      print('=== Login Button Pressed ===');
-      print('Email: ${emailController.text.trim()}');
-
       context.read<LoginCubit>().login(
         email: emailController.text.trim(),
         password: passController.text,
@@ -52,20 +49,12 @@ class _LoginViewBodyState extends State<LoginViewBody> {
         body: BlocConsumer<LoginCubit, LoginState>(
           listener: (context, state) {
             if (state is LoginSuccess) {
-              print('=== Login Success ===');
-              print('Token: ${state.token}');
-              print('Username: ${state.username}');
-
               if (!mounted) return;
 
               CacheHelper.saveToken(state.token).then((_) {
-                print('✅ Token saved successfully!');
-
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(
-                      '${state.message}\nمرحباً ${state.username}!',
-                    ),
+                    content: Text('تم تسجيل الدخول بنجاح'),
                     backgroundColor: primaryColor,
                     duration: const Duration(seconds: 2),
                   ),
@@ -94,112 +83,116 @@ class _LoginViewBodyState extends State<LoginViewBody> {
               child: Center(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        Gap(120.h),
-                        Image.asset('assets/images/tharadlogo.png'),
-                        Gap(80.h),
-                        Text('تسجيل الدخول', style: AppStyles.textstyle20),
-                        Gap(24.h),
+                  child: SafeArea(
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          Gap(120.h),
+                          Image.asset('assets/images/tharadlogo.png'),
+                          Gap(80.h),
+                          Text('تسجيل الدخول', style: AppStyles.textstyle20),
+                          Gap(24.h),
 
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Text(
-                            'البريد الإلكتروني',
-                            style: AppStyles.textstyle12,
-                          ),
-                        ),
-                        Gap(6.h),
-                        CustomTextFormField(
-                          hint: 'Tharad@gmail.com',
-                          ispassword: false,
-                          controller: emailController,
-                          validator: AppValidators.validateEmail,
-                        ),
-                        Gap(12.h),
-
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Text(
-                            'كلمة المرور',
-                            style: AppStyles.textstyle12,
-                          ),
-                        ),
-                        Gap(6.h),
-                        CustomTextFormField(
-                          hint: '**********',
-                          ispassword: true,
-                          controller: passController,
-                          validator: AppValidators.validatePassword,
-                        ),
-
-                        Row(
-                          children: [
-                            Checkbox(
-                              value: isChecked,
-                              activeColor: primaryColor,
-                              onChanged: (val) {
-                                setState(() {
-                                  isChecked = val!;
-                                });
-                              },
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              'البريد الإلكتروني',
+                              style: AppStyles.textstyle12,
                             ),
-                            Text(
-                              'تذكرني',
-                              style: AppStyles.textstyle12.copyWith(
-                                fontWeight: FontWeight.w400,
+                          ),
+                          Gap(6.h),
+                          CustomTextFormField(
+                            hint: 'Tharad@gmail.com',
+                            ispassword: false,
+                            controller: emailController,
+                            validator: AppValidators.validateEmail,
+                          ),
+                          Gap(12.h),
+
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              'كلمة المرور',
+                              style: AppStyles.textstyle12,
+                            ),
+                          ),
+                          Gap(6.h),
+                          CustomTextFormField(
+                            hint: '**********',
+                            ispassword: true,
+                            controller: passController,
+                            validator: AppValidators.validatePassword,
+                          ),
+
+                          Row(
+                            children: [
+                              Checkbox(
+                                value: isChecked,
+                                activeColor: primaryColor,
+                                onChanged: (val) {
+                                  setState(() {
+                                    isChecked = val!;
+                                  });
+                                },
                               ),
-                            ),
-                            const Spacer(),
-                            TextButton(
-                              onPressed: () {},
-                              child: Text(
-                                'هل نسيت كلمه المرور؟',
+                              Text(
+                                'تذكرني',
                                 style: AppStyles.textstyle12.copyWith(
-                                  color: primaryColor,
-                                  decoration: TextDecoration.underline,
-                                  decorationColor: primaryColor,
+                                  fontWeight: FontWeight.w400,
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                        Gap(40.h),
-
-                        state is LoginLoading
-                            ? CircularProgressIndicator(color: primaryColor)
-                            : CustomButtom(
-                                text: 'تسجيل الدخول',
-                                onTap: _handleLogin,
-                              ),
-                        Gap(8.h),
-
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text('ليس لديك حساب؟ '),
-                            TextButton(
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.symmetric(horizontal: 3.w),
-                              ),
-                              onPressed: () {
-                                context.push('/signup');
-                              },
-                              child: Text(
-                                'إنشاء حساب جديد',
-                                style: AppStyles.textstyle14.copyWith(
-                                  color: primaryColor,
-                                  decoration: TextDecoration.underline,
-                                  decorationColor: primaryColor,
+                              const Spacer(),
+                              TextButton(
+                                onPressed: () {},
+                                child: Text(
+                                  'هل نسيت كلمه المرور؟',
+                                  style: AppStyles.textstyle12.copyWith(
+                                    color: primaryColor,
+                                    decoration: TextDecoration.underline,
+                                    decorationColor: primaryColor,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                        Gap(80.h),
-                      ],
+                            ],
+                          ),
+                          Gap(40.h),
+
+                          state is LoginLoading
+                              ? CircularProgressIndicator(color: primaryColor)
+                              : CustomButtom(
+                                  text: 'تسجيل الدخول',
+                                  onTap: _handleLogin,
+                                ),
+                          Gap(8.h),
+
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text('ليس لديك حساب؟ '),
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 3.w,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  context.push('/signup');
+                                },
+                                child: Text(
+                                  'إنشاء حساب جديد',
+                                  style: AppStyles.textstyle14.copyWith(
+                                    color: primaryColor,
+                                    decoration: TextDecoration.underline,
+                                    decorationColor: primaryColor,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Gap(80.h),
+                        ],
+                      ),
                     ),
                   ),
                 ),

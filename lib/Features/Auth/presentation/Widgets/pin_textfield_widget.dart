@@ -2,13 +2,37 @@ import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:tharad/constants.dart';
 
-class PinTextField extends StatelessWidget {
-  final TextEditingController controller; // ✅ نستقبل الـ controller من برة
-
+class PinTextField extends StatefulWidget {
+  final TextEditingController? controller;
+  final void Function(String)? onChanged;
+  final void Function(String)? onCompleted;
   const PinTextField({
     super.key,
-    required this.controller, // ✅ مطلوب
+    this.controller,
+    required this.onChanged,
+    this.onCompleted,
   });
+
+  @override
+  State<PinTextField> createState() => _PinTextFieldState();
+}
+
+class _PinTextFieldState extends State<PinTextField> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = widget.controller ?? TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    if (widget.controller == null) {
+      _controller.dispose();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,14 +40,14 @@ class PinTextField extends StatelessWidget {
       textDirection: TextDirection.ltr,
       child: PinCodeTextField(
         appContext: context,
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        enablePinAutofill: true,
         length: 4,
-        controller: controller, // ✅ استخدام الـ controller اللي جاي من برة
+        controller: _controller,
         cursorColor: primaryColor,
         keyboardType: TextInputType.number,
-        onChanged: (v) {},
+        onChanged: widget.onChanged,
+        onCompleted: widget.onCompleted,
         textStyle: const TextStyle(fontSize: 20),
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         pinTheme: PinTheme(
           shape: PinCodeFieldShape.box,
           borderRadius: BorderRadius.circular(8),

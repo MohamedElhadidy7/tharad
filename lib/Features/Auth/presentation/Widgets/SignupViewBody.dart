@@ -56,36 +56,31 @@ class _SignupViewBodyState extends State<SignupViewBody> {
         body: BlocConsumer<SignUpCubit, SignUpState>(
           listener: (context, state) {
             if (state is SignUpSuccess) {
-              print('=== Sign Up Success ===');
-              print('Email: ${state.email}');
-              print('OTP: ${state.otp}');
-
-              if (!mounted) return;
-
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(state.message),
+                  content: Text('تم إنشاء الحساب بنجاح'),
                   backgroundColor: primaryColor,
                   duration: const Duration(seconds: 2),
                 ),
               );
 
               Future.microtask(() {
-                if (mounted) {
-                  context.go(
-                    '/otp',
-                    extra: {'email': state.email, 'otp': state.otp},
+                if (context.mounted) {
+                  context.push(
+                    '/otp-verification',
+                    extra: {
+                      'email': emailController.text.trim(),
+                      'password': passController.text,
+                    },
                   );
                 }
               });
             } else if (state is SignUpFailure) {
-              if (!mounted) return;
-
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.errorMessage),
                   backgroundColor: Colors.red,
-                  duration: const Duration(seconds: 4),
+                  duration: const Duration(seconds: 3),
                 ),
               );
             }
@@ -97,131 +92,135 @@ class _SignupViewBodyState extends State<SignupViewBody> {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Form(
                     key: _formKey,
-                    child: Column(
-                      children: [
-                        Gap(80.h),
-                        Image.asset('assets/images/tharadlogo.png'),
-                        Gap(40.h),
-                        Text('إنشاء حساب جديد', style: AppStyles.textstyle20),
-                        Gap(24.h),
+                    child: SafeArea(
+                      child: Column(
+                        children: [
+                          Gap(80.h),
+                          Image.asset('assets/images/tharadlogo.png'),
+                          Gap(40.h),
+                          Text('إنشاء حساب جديد', style: AppStyles.textstyle20),
+                          Gap(24.h),
 
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Text(
-                            'الصوره الشخصية',
-                            style: AppStyles.textstyle12,
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              'الصوره الشخصية',
+                              style: AppStyles.textstyle12,
+                            ),
                           ),
-                        ),
-                        Gap(6.h),
-                        PickedImageWidget(
-                          onImagePicked: (imagePath) {
-                            setState(() {
-                              _imagePath = imagePath;
-                            });
-                          },
-                        ),
-                        Gap(12.h),
-
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Text(
-                            'إسم المستخدم',
-                            style: AppStyles.textstyle12,
+                          Gap(6.h),
+                          PickedImageWidget(
+                            onImagePicked: (imagePath) {
+                              setState(() {
+                                _imagePath = imagePath;
+                              });
+                            },
                           ),
-                        ),
-                        Gap(6.h),
-                        CustomTextFormField(
-                          hint: 'thar22',
-                          ispassword: false,
-                          controller: usernameController,
-                          validator: AppValidators.validateUsername,
-                        ),
-                        Gap(12.h),
+                          Gap(12.h),
 
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Text(
-                            'البريد الإلكتروني',
-                            style: AppStyles.textstyle12,
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              'إسم المستخدم',
+                              style: AppStyles.textstyle12,
+                            ),
                           ),
-                        ),
-                        Gap(6.h),
-                        CustomTextFormField(
-                          hint: 'Tharad@gmail.com',
-                          ispassword: false,
-                          controller: emailController,
-                          validator: AppValidators.validateEmail,
-                        ),
-                        Gap(12.h),
-
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Text(
-                            'كلمة المرور ',
-                            style: AppStyles.textstyle12,
+                          Gap(6.h),
+                          CustomTextFormField(
+                            hint: 'thar22',
+                            ispassword: false,
+                            controller: usernameController,
+                            validator: AppValidators.validateUsername,
                           ),
-                        ),
-                        Gap(6.h),
-                        CustomTextFormField(
-                          hint: '**********',
-                          ispassword: true,
-                          controller: passController,
-                          validator: AppValidators.validatePassword,
-                        ),
-                        Gap(12.h),
+                          Gap(12.h),
 
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Text(
-                            'تأكيد كلمة المرور',
-                            style: AppStyles.textstyle12,
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              'البريد الإلكتروني',
+                              style: AppStyles.textstyle12,
+                            ),
                           ),
-                        ),
-                        Gap(6.h),
-                        CustomTextFormField(
-                          hint: '**********',
-                          ispassword: true,
-                          controller: confirmpassController,
-                          validator: (value) =>
-                              AppValidators.validateConfirmPassword(
-                                value,
-                                passController.text,
-                              ),
-                        ),
-                        Gap(40.h),
+                          Gap(6.h),
+                          CustomTextFormField(
+                            hint: 'Tharad@gmail.com',
+                            ispassword: false,
+                            controller: emailController,
+                            validator: AppValidators.validateEmail,
+                          ),
+                          Gap(12.h),
 
-                        state is SignUpLoading
-                            ? CircularProgressIndicator(color: primaryColor)
-                            : CustomButtom(
-                                text: 'إنشاء حساب جديد',
-                                onTap: _handleSignUp,
-                              ),
-                        Gap(8.h),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              'كلمة المرور ',
+                              style: AppStyles.textstyle12,
+                            ),
+                          ),
+                          Gap(6.h),
+                          CustomTextFormField(
+                            hint: '**********',
+                            ispassword: true,
+                            controller: passController,
+                            validator: AppValidators.validatePassword,
+                          ),
+                          Gap(12.h),
 
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text(' لديك حساب؟'),
-                            TextButton(
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.symmetric(horizontal: 3.w),
-                              ),
-                              onPressed: () {
-                                context.push('/');
-                              },
-                              child: Text(
-                                'تسجيل الدخول',
-                                style: AppStyles.textstyle14.copyWith(
-                                  color: primaryColor,
-                                  decoration: TextDecoration.underline,
-                                  decorationColor: primaryColor,
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              'تأكيد كلمة المرور',
+                              style: AppStyles.textstyle12,
+                            ),
+                          ),
+                          Gap(6.h),
+                          CustomTextFormField(
+                            hint: '**********',
+                            ispassword: true,
+                            controller: confirmpassController,
+                            validator: (value) =>
+                                AppValidators.validateConfirmPassword(
+                                  value,
+                                  passController.text,
+                                ),
+                          ),
+                          Gap(40.h),
+
+                          state is SignUpLoading
+                              ? CircularProgressIndicator(color: primaryColor)
+                              : CustomButtom(
+                                  text: 'إنشاء حساب جديد',
+                                  onTap: _handleSignUp,
+                                ),
+                          Gap(8.h),
+
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(' لديك حساب؟'),
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 3.w,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  context.push('/');
+                                },
+                                child: Text(
+                                  'تسجيل الدخول',
+                                  style: AppStyles.textstyle14.copyWith(
+                                    color: primaryColor,
+                                    decoration: TextDecoration.underline,
+                                    decorationColor: primaryColor,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                        Gap(80.h),
-                      ],
+                            ],
+                          ),
+                          Gap(80.h),
+                        ],
+                      ),
                     ),
                   ),
                 ),

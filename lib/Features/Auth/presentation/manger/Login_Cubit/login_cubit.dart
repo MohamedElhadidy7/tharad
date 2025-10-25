@@ -17,14 +17,24 @@ class LoginCubit extends Cubit<LoginState> {
         password: password,
       );
 
+      final token = response.data?.token ?? '';
+      final username = response.data?.username ?? '';
+      final userEmail = response.data?.email ?? '';
+
+      if (token.isEmpty) {
+        emit(LoginFailure('حدث خطأ: لم يتم استلام رمز التوثيق'));
+        return;
+      }
+
       emit(
         LoginSuccess(
           message: response.message,
-          token: response.data?.token ?? '',
-          username: response.data?.username ?? '',
-          email: response.data?.email ?? '',
+          token: token,
+          username: username,
+          email: userEmail,
         ),
       );
+      print('✅ LoginSuccess emitted successfully');
     } on ValidationException catch (e) {
       emit(LoginFailure(e.message));
     } on NetworkException catch (e) {

@@ -1,23 +1,27 @@
-// Features/Auth/presentation/views/otp_verification_view.dart
-
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tharad/Features/Auth/presentation/Widgets/pin_textfield_widget.dart';
 import 'package:tharad/Features/Auth/presentation/Widgets/resend_widget.dart';
+import 'package:tharad/Features/Auth/presentation/manger/otp_Cubit/otp_verify_cubit.dart';
+import 'package:tharad/Features/Auth/presentation/manger/otp_Cubit/otp_verify_state.dart';
+import 'package:tharad/Features/Auth/presentation/manger/Login_Cubit/login_cubit.dart';
+import 'package:tharad/Features/Auth/presentation/manger/Login_Cubit/login_state.dart';
 import 'package:tharad/constants.dart';
 import 'package:tharad/core/Widgets/Custom_Buttom.dart';
+import 'package:tharad/core/utils/helpers/Cache_helper.dart';
 import 'package:tharad/core/utils/styles/app_styles.dart';
 
 class OtpVerifivationView extends StatefulWidget {
   final String email;
-  final int otp;
+  final String password;
 
   const OtpVerifivationView({
     super.key,
     required this.email,
-    required this.otp,
+    required this.password,
   });
 
   @override
@@ -25,111 +29,165 @@ class OtpVerifivationView extends StatefulWidget {
 }
 
 class _OtpVerifivationViewState extends State<OtpVerifivationView> {
-  final TextEditingController otpController = TextEditingController();
-  bool isLoading = false;
+  String enteredOtp = '';
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    otpController.dispose();
-    super.dispose();
-  }
-
-  void _handleVerifyOtp() {
-    if (otpController.text.trim().isEmpty) {
+  void _handleVerifyOtp(BuildContext context) {
+    if (enteredOtp.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('من فضلك أدخل رمز التحقق'),
           backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
         ),
       );
       return;
     }
 
-    if (otpController.text.trim().length != 4) {
+    if (enteredOtp.length != 4) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('رمز التحقق يجب أن يكون 4 أرقام'),
           backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
         ),
       );
       return;
     }
 
-    setState(() {
-      isLoading = true;
-    });
-
-    Future.delayed(const Duration(seconds: 1), () {
-      setState(() {
-        isLoading = false;
-      });
-
-      if (otpController.text.trim() == widget.otp.toString()) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('تم التحقق بنجاح! يمكنك الآن تسجيل الدخول'),
-            backgroundColor: primaryColor,
-          ),
-        );
-
-        Future.delayed(const Duration(milliseconds: 500), () {
-          GoRouter.of(context).go('/login');
-        });
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('رمز التحقق غير صحيح. حاول مرة أخرى'),
-            backgroundColor: Colors.red,
-            duration: Duration(seconds: 3),
-          ),
-        );
-      }
-    });
+    context.read<VerifyOtpCubit>().verifyOtp(
+      email: widget.email,
+      otp: enteredOtp,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                Gap(120.h),
-                Image.asset('assets/images/tharadlogo.png'),
-                Gap(100.h),
-                Text('رمز التحقق', style: AppStyles.textstyle20),
-                Gap(8.h),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Text(
-                    'لاستكمال فتح حسابك ادخل رمز التحقق المرسل عبر البريد الإلكتروني',
-                    style: AppStyles.textstyle12.copyWith(
-                      color: const Color(0xff998C8C),
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<VerifyOtpCubit, VerifyOtpState>(
+            listener: (context, state) {
+              if (state is VerifyOtpSuccess) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text(
+                      'تم التحقق بنجاح! جاري تسجيل الدخول...',
                     ),
-                    textAlign: TextAlign.center,
+                    backgroundColor: primaryColor,
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+
+                FocusScope.of(context).unfocus();
+                Future.delayed(const Duration(milliseconds: 1500), () {
+                  if (context.mounted) {
+                    context.read<LoginCubit>().login(
+                      email: widget.email,
+                      password: widget.password,
+                    );
+                  }
+                });
+              } else if (state is VerifyOtpFailure) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.errorMessage),
+                    backgroundColor: Colors.red,
+                    duration: const Duration(seconds: 3),
+                  ),
+                );
+              }
+            },
+          ),
+
+          BlocListener<LoginCubit, LoginState>(
+            listener: (context, state) {
+              if (state is LoginSuccess) {
+                CacheHelper.saveToken(state.token).then((_) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('مرحباً ${state.username}! 🎉'),
+                      backgroundColor: primaryColor,
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+
+                  Future.microtask(() {
+                    if (context.mounted) {
+                      context.go('/profile');
+                    }
+                  });
+                });
+              } else if (state is LoginFailure) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.errorMessage),
+                    backgroundColor: Colors.red,
+                    duration: const Duration(seconds: 3),
+                  ),
+                );
+              }
+            },
+          ),
+        ],
+        child: BlocBuilder<VerifyOtpCubit, VerifyOtpState>(
+          builder: (context, state) {
+            final isLoading = state is VerifyOtpLoading;
+
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Gap(120.h),
+                      Image.asset('assets/images/tharadlogo.png'),
+                      Gap(100.h),
+                      Text('رمز التحقق', style: AppStyles.textstyle20),
+                      Gap(8.h),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Text(
+                          'لاستكمال فتح حسابك ادخل رمز التحقق المرسل عبر البريد الإلكتروني',
+                          style: AppStyles.textstyle12.copyWith(
+                            color: const Color(0xff998C8C),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      Gap(40.h),
+
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 30),
+                        child: PinTextField(
+                          onCompleted: (code) {
+                            setState(() => enteredOtp = code);
+                          },
+                          onChanged: (code) {
+                            enteredOtp = code;
+                          },
+                        ),
+                      ),
+
+                      Gap(24.h),
+
+                      const ResendWidget(),
+
+                      Gap(40.h),
+
+                      isLoading
+                          ? CircularProgressIndicator(color: primaryColor)
+                          : CustomButtom(
+                              text: 'المتابعه',
+                              onTap: () => _handleVerifyOtp(context),
+                            ),
+
+                      Gap(40.h),
+                    ],
                   ),
                 ),
-                Gap(40.h),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30),
-                  child: PinTextField(controller: otpController),
-                ),
-                Gap(24.h),
-                const ResendWidget(),
-                Gap(40.h),
-                isLoading
-                    ? CircularProgressIndicator(color: primaryColor)
-                    : CustomButtom(text: 'المتابعه', onTap: _handleVerifyOtp),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
     );

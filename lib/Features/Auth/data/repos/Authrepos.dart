@@ -1,6 +1,8 @@
 import 'package:tharad/Features/Auth/data/models/login_model.dart';
 import 'package:tharad/Features/Auth/data/models/sign_up_model.dart';
 
+import '../models/otp_model.dart';
+
 abstract class AuthRepos {
   Future<RegistrationResponseModel> signUpService({
     required String username,
@@ -13,5 +15,9 @@ abstract class AuthRepos {
   Future<LoginResponseModel> loginService({
     required String email,
     required String password,
+  });
+  Future<VerifyOtpModel> verifyOtpService({
+    required String email,
+    required String otp,
   });
 }
