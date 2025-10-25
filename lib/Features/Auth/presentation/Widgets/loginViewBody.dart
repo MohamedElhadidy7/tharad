@@ -3,47 +3,43 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:tharad/Features/Auth/presentation/Widgets/Picked_image_widget.dart';
-import 'package:tharad/Features/Auth/presentation/manger/SignUp_Cubit/sign_up_cubit.dart';
-import 'package:tharad/Features/Auth/presentation/manger/SignUp_Cubit/sign_up_state.dart';
+import 'package:tharad/Features/Auth/presentation/manger/Login_Cubit/login_cubit.dart';
+import 'package:tharad/Features/Auth/presentation/manger/Login_Cubit/login_state.dart';
 import 'package:tharad/constants.dart';
 import 'package:tharad/core/Widgets/Custom_Buttom.dart';
 import 'package:tharad/core/Widgets/Custom_TextFormField.dart';
+import 'package:tharad/core/utils/helpers/Cache_helper.dart';
 import 'package:tharad/core/utils/helpers/validation.dart';
 import 'package:tharad/core/utils/styles/app_styles.dart';
 
-class SignupViewBody extends StatefulWidget {
-  const SignupViewBody({super.key});
+class LoginViewBody extends StatefulWidget {
+  const LoginViewBody({super.key});
 
   @override
-  State<SignupViewBody> createState() => _SignupViewBodyState();
+  State<LoginViewBody> createState() => _LoginViewBodyState();
 }
 
-class _SignupViewBodyState extends State<SignupViewBody> {
-  final TextEditingController usernameController = TextEditingController();
+class _LoginViewBodyState extends State<LoginViewBody> {
+  bool isChecked = false;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passController = TextEditingController();
-  final TextEditingController confirmpassController = TextEditingController();
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  String? _imagePath;
 
   @override
   void dispose() {
-    usernameController.dispose();
     emailController.dispose();
     passController.dispose();
-    confirmpassController.dispose();
     super.dispose();
   }
 
-  void _handleSignUp() {
+  void _handleLogin() {
     if (_formKey.currentState!.validate()) {
-      context.read<SignUpCubit>().signUp(
-        username: usernameController.text.trim(),
+      print('=== Login Button Pressed ===');
+      print('Email: ${emailController.text.trim()}');
+
+      context.read<LoginCubit>().login(
         email: emailController.text.trim(),
         password: passController.text,
-        confirmPassword: confirmpassController.text,
-        imagePath: _imagePath,
       );
     }
   }
@@ -53,32 +49,35 @@ class _SignupViewBodyState extends State<SignupViewBody> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        body: BlocConsumer<SignUpCubit, SignUpState>(
+        body: BlocConsumer<LoginCubit, LoginState>(
           listener: (context, state) {
-            if (state is SignUpSuccess) {
-              print('=== Sign Up Success ===');
-              print('Email: ${state.email}');
-              print('OTP: ${state.otp}');
+            if (state is LoginSuccess) {
+              print('=== Login Success ===');
+              print('Token: ${state.token}');
+              print('Username: ${state.username}');
 
               if (!mounted) return;
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: primaryColor,
-                  duration: const Duration(seconds: 2),
-                ),
-              );
+              CacheHelper.saveToken(state.token).then((_) {
+                print('✅ Token saved successfully!');
 
-              Future.microtask(() {
-                if (mounted) {
-                  context.go(
-                    '/otp',
-                    extra: {'email': state.email, 'otp': state.otp},
-                  );
-                }
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      '${state.message}\nمرحباً ${state.username}!',
+                    ),
+                    backgroundColor: primaryColor,
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+
+                Future.microtask(() {
+                  if (mounted) {
+                    context.go('/profile');
+                  }
+                });
               });
-            } else if (state is SignUpFailure) {
+            } else if (state is LoginFailure) {
               if (!mounted) return;
 
               ScaffoldMessenger.of(context).showSnackBar(
@@ -99,44 +98,11 @@ class _SignupViewBodyState extends State<SignupViewBody> {
                     key: _formKey,
                     child: Column(
                       children: [
-                        Gap(80.h),
+                        Gap(120.h),
                         Image.asset('assets/images/tharadlogo.png'),
-                        Gap(40.h),
-                        Text('إنشاء حساب جديد', style: AppStyles.textstyle20),
+                        Gap(80.h),
+                        Text('تسجيل الدخول', style: AppStyles.textstyle20),
                         Gap(24.h),
-
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Text(
-                            'الصوره الشخصية',
-                            style: AppStyles.textstyle12,
-                          ),
-                        ),
-                        Gap(6.h),
-                        PickedImageWidget(
-                          onImagePicked: (imagePath) {
-                            setState(() {
-                              _imagePath = imagePath;
-                            });
-                          },
-                        ),
-                        Gap(12.h),
-
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Text(
-                            'إسم المستخدم',
-                            style: AppStyles.textstyle12,
-                          ),
-                        ),
-                        Gap(6.h),
-                        CustomTextFormField(
-                          hint: 'thar22',
-                          ispassword: false,
-                          controller: usernameController,
-                          validator: AppValidators.validateUsername,
-                        ),
-                        Gap(12.h),
 
                         Align(
                           alignment: Alignment.centerRight,
@@ -157,7 +123,7 @@ class _SignupViewBodyState extends State<SignupViewBody> {
                         Align(
                           alignment: Alignment.centerRight,
                           child: Text(
-                            'كلمة المرور ',
+                            'كلمة المرور',
                             style: AppStyles.textstyle12,
                           ),
                         ),
@@ -168,49 +134,61 @@ class _SignupViewBodyState extends State<SignupViewBody> {
                           controller: passController,
                           validator: AppValidators.validatePassword,
                         ),
-                        Gap(12.h),
 
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Text(
-                            'تأكيد كلمة المرور',
-                            style: AppStyles.textstyle12,
-                          ),
-                        ),
-                        Gap(6.h),
-                        CustomTextFormField(
-                          hint: '**********',
-                          ispassword: true,
-                          controller: confirmpassController,
-                          validator: (value) =>
-                              AppValidators.validateConfirmPassword(
-                                value,
-                                passController.text,
+                        Row(
+                          children: [
+                            Checkbox(
+                              value: isChecked,
+                              activeColor: primaryColor,
+                              onChanged: (val) {
+                                setState(() {
+                                  isChecked = val!;
+                                });
+                              },
+                            ),
+                            Text(
+                              'تذكرني',
+                              style: AppStyles.textstyle12.copyWith(
+                                fontWeight: FontWeight.w400,
                               ),
+                            ),
+                            const Spacer(),
+                            TextButton(
+                              onPressed: () {},
+                              child: Text(
+                                'هل نسيت كلمه المرور؟',
+                                style: AppStyles.textstyle12.copyWith(
+                                  color: primaryColor,
+                                  decoration: TextDecoration.underline,
+                                  decorationColor: primaryColor,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         Gap(40.h),
 
-                        state is SignUpLoading
+                        state is LoginLoading
                             ? CircularProgressIndicator(color: primaryColor)
                             : CustomButtom(
-                                text: 'إنشاء حساب جديد',
-                                onTap: _handleSignUp,
+                                text: 'تسجيل الدخول',
+                                onTap: _handleLogin,
                               ),
                         Gap(8.h),
 
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text(' لديك حساب؟'),
+                            const Text('ليس لديك حساب؟ '),
                             TextButton(
                               style: TextButton.styleFrom(
                                 padding: EdgeInsets.symmetric(horizontal: 3.w),
                               ),
                               onPressed: () {
-                                context.push('/');
+                                context.push('/signup');
                               },
                               child: Text(
-                                'تسجيل الدخول',
+                                'إنشاء حساب جديد',
                                 style: AppStyles.textstyle14.copyWith(
                                   color: primaryColor,
                                   decoration: TextDecoration.underline,

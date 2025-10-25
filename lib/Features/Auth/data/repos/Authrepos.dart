@@ -1,3 +1,4 @@
+import 'package:tharad/Features/Auth/data/models/login_model.dart';
 import 'package:tharad/Features/Auth/data/models/sign_up_model.dart';
 
 abstract class AuthRepos {
@@ -7,5 +8,10 @@ abstract class AuthRepos {
     required String password,
     required String confirmPassword,
     required String? imagePath,
+  });
+
+  Future<LoginResponseModel> loginService({
+    required String email,
+    required String password,
   });
 }
