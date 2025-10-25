@@ -8,8 +8,13 @@ import 'package:tharad/constants.dart';
 
 class PickedImageWidget extends StatefulWidget {
   final Function(String?)? onImagePicked;
+  final String? initialImageUrl;
 
-  const PickedImageWidget({super.key, this.onImagePicked});
+  const PickedImageWidget({
+    super.key,
+    this.onImagePicked,
+    this.initialImageUrl,
+  });
 
   @override
   State<PickedImageWidget> createState() => _PickedImageWidgetState();
@@ -18,6 +23,23 @@ class PickedImageWidget extends StatefulWidget {
 class _PickedImageWidgetState extends State<PickedImageWidget> {
   final ImagePicker _picker = ImagePicker();
   String? _imagePath;
+
+  @override
+  void initState() {
+    super.initState();
+    _imagePath = widget.initialImageUrl;
+  }
+
+  @override
+  void didUpdateWidget(PickedImageWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialImageUrl != oldWidget.initialImageUrl &&
+        _imagePath == null) {
+      setState(() {
+        _imagePath = widget.initialImageUrl;
+      });
+    }
+  }
 
   Future<void> _pickImage() async {
     try {
@@ -69,6 +91,16 @@ class _PickedImageWidgetState extends State<PickedImageWidget> {
     widget.onImagePicked?.call(null);
   }
 
+  bool _isNetworkImage() {
+    return _imagePath != null &&
+        (_imagePath!.startsWith('http://') ||
+            _imagePath!.startsWith('https://'));
+  }
+
+  bool _isLocalImage() {
+    return _imagePath != null && !_isNetworkImage();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -114,10 +146,41 @@ class _PickedImageWidgetState extends State<PickedImageWidget> {
                       child: SizedBox(
                         width: double.infinity,
                         height: double.infinity,
-                        child: Image.file(File(_imagePath!), fit: BoxFit.fill),
+                        child: _isLocalImage()
+                            ? Image.file(File(_imagePath!), fit: BoxFit.cover)
+                            : Image.network(
+                                _imagePath!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Center(
+                                    child: Icon(
+                                      Icons.broken_image,
+                                      size: 50,
+                                      color: Colors.grey,
+                                    ),
+                                  );
+                                },
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return Center(
+                                        child: CircularProgressIndicator(
+                                          color: primaryColor,
+                                          value:
+                                              loadingProgress
+                                                      .expectedTotalBytes !=
+                                                  null
+                                              ? loadingProgress
+                                                        .cumulativeBytesLoaded /
+                                                    loadingProgress
+                                                        .expectedTotalBytes!
+                                              : null,
+                                        ),
+                                      );
+                                    },
+                              ),
                       ),
                     ),
-
                     Positioned(
                       top: 8,
                       right: 8,
@@ -144,7 +207,6 @@ class _PickedImageWidgetState extends State<PickedImageWidget> {
                         ),
                       ),
                     ),
-
                     Positioned(
                       bottom: 8,
                       right: 8,

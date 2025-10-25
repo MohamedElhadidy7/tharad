@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tharad/Features/Auth/data/repos/Authrepos.dart';
 import 'package:tharad/Features/Auth/presentation/manger/Login_Cubit/login_state.dart';
+import 'package:tharad/core/utils/helpers/Cache_helper.dart';
 import 'package:tharad/core/utils/network/exceptions.dart';
 
 class LoginCubit extends Cubit<LoginState> {
@@ -19,12 +20,18 @@ class LoginCubit extends Cubit<LoginState> {
 
       final token = response.data?.token ?? '';
       final username = response.data?.username ?? '';
-      final userEmail = response.data?.email ?? '';
+      final userEmail = response.data?.email ?? email;
 
       if (token.isEmpty) {
         emit(LoginFailure('حدث خطأ: لم يتم استلام رمز التوثيق'));
         return;
       }
+
+      await CacheHelper.saveUserProfile({
+        'username': username,
+        'email': userEmail,
+        'image': null,
+      });
 
       emit(
         LoginSuccess(
@@ -34,7 +41,6 @@ class LoginCubit extends Cubit<LoginState> {
           email: userEmail,
         ),
       );
-      print('✅ LoginSuccess emitted successfully');
     } on ValidationException catch (e) {
       emit(LoginFailure(e.message));
     } on NetworkException catch (e) {

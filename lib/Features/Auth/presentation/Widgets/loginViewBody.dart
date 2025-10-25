@@ -51,10 +51,20 @@ class _LoginViewBodyState extends State<LoginViewBody> {
             if (state is LoginSuccess) {
               if (!mounted) return;
 
-              CacheHelper.saveToken(state.token).then((_) {
+              CacheHelper.saveToken(state.token).then((_) async {
+                await CacheHelper.saveUserProfile({
+                  'username': state.username,
+                  'email': state.email,
+                  'image': null,
+                });
+
+                if (!mounted) return;
+
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('تم تسجيل الدخول بنجاح'),
+                    content: Text(
+                      '${state.message}\nمرحباً ${state.username}!',
+                    ),
                     backgroundColor: primaryColor,
                     duration: const Duration(seconds: 2),
                   ),

@@ -1,7 +1,6 @@
-// Features/Auth/data/repos/AuthreposImplementation.dart
-
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:tharad/Features/Auth/data/models/logOut_model.dart';
 import 'package:tharad/Features/Auth/data/models/login_model.dart';
 import 'package:tharad/Features/Auth/data/models/otp_model.dart';
 import 'package:tharad/Features/Auth/data/models/sign_up_model.dart';
@@ -46,7 +45,7 @@ class AuthReposImplementation implements AuthRepos {
             ),
           ),
         );
-      } else {}
+      }
 
       final response = await apiService.post(
         endpoint: 'auth/register',
@@ -95,6 +94,24 @@ class AuthReposImplementation implements AuthRepos {
       );
 
       return VerifyOtpModel.fromJson(response);
+    } on DioException catch (e) {
+      throw ErrorHandler.handleDioError(e);
+    } on SocketException catch (e) {
+      throw ErrorHandler.handleSocketError(e);
+    } catch (e, stackTrace) {
+      throw ErrorHandler.handleGeneralError(e);
+    }
+  }
+
+  @override
+  Future<LogoutModel> logoutService() async {
+    try {
+      final response = await apiService.delete(
+        endpoint: 'auth/logout',
+        requiresAuth: true,
+      );
+
+      return LogoutModel.fromJson(response);
     } on DioException catch (e) {
       throw ErrorHandler.handleDioError(e);
     } on SocketException catch (e) {

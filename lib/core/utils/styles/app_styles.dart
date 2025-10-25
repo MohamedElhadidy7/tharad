@@ -15,4 +15,8 @@ abstract class AppStyles {
     fontSize: 14.sp,
     fontWeight: FontWeight.bold,
   );
+  static final textstyle16 = TextStyle(
+    fontSize: 16.sp,
+    fontWeight: FontWeight.bold,
+  );
 }
